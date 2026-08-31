@@ -56,6 +56,16 @@
         </div>
         <div class="row2">
           <div>
+            <label>DNI</label>
+            <input type="number" id="f_dni" placeholder="DNI">
+          </div>
+          <div>
+            <label>Legajo</label>
+            <input type="number" id="f_legajo" placeholder="legajo o matricula">
+          </div>
+        </div>
+        <div class="row2">
+          <div>
             <label>Fecha</label>
             <input type="text" id="f_fecha" placeholder="dd/mm/aaaa">
           </div>
@@ -70,6 +80,23 @@
       <div class="card">
         <h2>Motivo de consulta</h2>
         <textarea id="f_motivo" placeholder="Toque el micrófono del teclado para dictar"></textarea>
+      </div>
+
+      <div class="card">
+        <h2>Signos vitales</h2>
+        <p class="hint">Se reutilizan automáticamente para sugerir puntajes en los scores (Glasgow, CRAMP y los que se
+          agreguen).</p>
+        <div class="row3">
+          <div><label>FC (lpm)</label><input type="text" id="v_fc" inputmode="numeric"></div>
+          <div><label>FR (rpm)</label><input type="text" id="v_fr" inputmode="numeric"></div>
+          <div><label>T° (°C)</label><input type="text" id="v_temp" inputmode="decimal"></div>
+        </div>
+        <div class="row2">
+          <div><label>TA sistólica</label><input type="text" id="v_tas" inputmode="numeric"></div>
+          <div><label>TA diastólica</label><input type="text" id="v_tad" inputmode="numeric"></div>
+        </div>
+        <label>SatO2 (%)</label>
+        <input type="text" id="v_sat" inputmode="numeric">
       </div>
 
       <div class="card">
@@ -171,6 +198,7 @@
             <button class="opt" data-val="0">Relleno capilar ausente o PAS &lt; 85 mmHg <span
                 class="pts">0</span></button>
           </div>
+          <p class="hint suggestion" id="sugerC" style="margin-top:6px;"></p>
         </div>
 
         <div class="param" data-group="respiracion">
@@ -180,6 +208,7 @@
             <button class="opt" data-val="1">Anormal (aumentada o superficial) <span class="pts">1</span></button>
             <button class="opt" data-val="0">Ausente <span class="pts">0</span></button>
           </div>
+          <p class="hint suggestion" id="sugerR" style="margin-top:6px;"></p>
         </div>
 
         <div class="param" data-group="abdomen">
@@ -303,8 +332,8 @@
     <footer class="note">Herramienta de apoyo. No reemplaza el registro oficial en el sistema de historia clínica
       correspondiente.</footer>
   </div>
-  <script src="script.js"></script>
 
+  <script src="script.js"></script>
 </body>
 
 </html>
