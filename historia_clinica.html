@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Historia Clínica — Offline</title>
+<style>
+  :root{
+    --bg:#F5F6F4;
+    --surface:#FFFFFF;
+    --ink:#17262B;
+    --ink-soft:#5B6B70;
+    --line:#DCE3E2;
+    --teal:#0E7C7B;
+    --teal-dark:#0A5F5E;
+    --ok:#1B7F4C;
+    --ok-bg:#EAF6EE;
+    --warn:#B3261E;
+    --warn-bg:#FCEBEA;
+    --mid:#946B00;
+    --mid-bg:#FBF3DF;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    line-height:1.45;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .app{max-width:480px;margin:0 auto;padding-bottom:64px;}
+
+  header{
+    position:sticky;top:0;z-index:10;
+    background:var(--teal);
+    color:#fff;
+    padding:14px 16px;
+    display:flex;align-items:center;justify-content:space-between;
+    border-bottom:1px solid var(--teal-dark);
+  }
+  header h1{font-size:17px;margin:0;font-weight:600;letter-spacing:.2px;}
+  header .sub{font-size:11.5px;color:#CDEAE9;margin-top:2px;}
+  .offline-pill{
+    font-size:10.5px;background:rgba(255,255,255,.16);
+    padding:3px 8px;border-radius:100px;white-space:nowrap;
+  }
+
+  nav.tabs{
+    display:flex;background:var(--surface);
+    border-bottom:1px solid var(--line);
+  }
+  nav.tabs button{
+    flex:1;padding:11px 4px;background:none;border:none;
+    font-size:13px;color:var(--ink-soft);font-weight:600;
+    border-bottom:2px solid transparent;
+  }
+  nav.tabs button.active{color:var(--teal-dark);border-bottom-color:var(--teal);}
+  nav.tabs button.hidden-tab{display:none;}
+
+  .accordion{background:var(--surface);border-bottom:1px solid var(--line);}
+  .accordion-toggle{
+    width:100%;display:flex;justify-content:space-between;align-items:center;
+    background:none;border:none;padding:11px 16px;font-size:13px;font-weight:600;
+    color:var(--teal-dark);
+  }
+  .accordion-toggle .chev{transition:transform .15s ease;color:var(--ink-soft);}
+  .accordion-toggle.open .chev{transform:rotate(180deg);}
+  .accordion-panel{display:none;padding:0 16px 14px;}
+  .accordion-panel.open{display:block;}
+  .check-row{
+    display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink);
+    padding:7px 0;
+  }
+  .check-row input{width:17px;height:17px;accent-color:var(--teal);}
+
+  section.view{display:none;padding:14px 16px;}
+  section.view.active{display:block;}
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:14px;
+    margin-bottom:12px;
+  }
+  .card h2{
+    font-size:13px;text-transform:none;color:var(--teal-dark);
+    margin:0 0 10px 0;font-weight:700;
+    border-bottom:1px solid var(--line);padding-bottom:8px;
+  }
+
+  label{display:block;font-size:12.5px;color:var(--ink-soft);margin-bottom:4px;margin-top:10px;}
+  label:first-child{margin-top:0;}
+  input[type=text], input[type=number], textarea{
+    width:100%;border:1px solid var(--line);border-radius:5px;
+    padding:9px 10px;font-size:15px;font-family:inherit;color:var(--ink);
+    background:#FCFDFD;
+  }
+  textarea{resize:vertical;min-height:56px;}
+  input:focus, textarea:focus{outline:2px solid var(--teal);outline-offset:0;border-color:var(--teal);}
+
+  .row2{display:flex;gap:10px;}
+  .row2 > div{flex:1;}
+
+  .voice-hint{
+    font-size:11px;color:var(--ink-soft);margin-top:8px;
+    display:flex;gap:6px;align-items:flex-start;
+  }
+  .voice-hint svg{flex-shrink:0;margin-top:1px;}
+
+  /* Score selector buttons */
+  .param{margin-bottom:14px;}
+  .param:last-child{margin-bottom:0;}
+  .param .plabel{font-size:13.5px;font-weight:600;margin-bottom:6px;}
+  .options{display:flex;flex-direction:column;gap:6px;}
+  .opt{
+    text-align:left;border:1px solid var(--line);background:#FCFDFD;
+    border-radius:5px;padding:9px 10px;font-size:13px;color:var(--ink);
+    display:flex;justify-content:space-between;gap:8px;
+  }
+  .opt .pts{color:var(--ink-soft);font-variant-numeric:tabular-nums;font-size:12.5px;}
+  .opt.selected{
+    background:var(--teal);border-color:var(--teal-dark);color:#fff;
+  }
+  .opt.selected .pts{color:#DFF3F2;}
+
+  .score-total{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-top:14px;padding-top:12px;border-top:1px solid var(--line);
+  }
+  .score-total .num{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;}
+  .badge{font-size:12px;font-weight:700;padding:5px 10px;border-radius:5px;}
+  .badge.ok{background:var(--ok-bg);color:var(--ok);}
+  .badge.warn{background:var(--warn-bg);color:var(--warn);}
+  .badge.mid{background:var(--mid-bg);color:var(--mid);}
+  .badge.neutral{background:#EEF0EF;color:var(--ink-soft);}
+
+  button.primary{
+    width:100%;background:var(--teal);color:#fff;border:none;
+    border-radius:6px;padding:12px;font-size:14.5px;font-weight:600;margin-top:6px;
+  }
+  button.secondary{
+    width:100%;background:#fff;color:var(--teal-dark);border:1px solid var(--teal);
+    border-radius:6px;padding:11px;font-size:14px;font-weight:600;margin-top:8px;
+  }
+  button.ghost{
+    width:100%;background:none;color:var(--ink-soft);border:1px solid var(--line);
+    border-radius:6px;padding:10px;font-size:13px;margin-top:8px;
+  }
+
+  #resumenBox{
+    width:100%;min-height:220px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:12.5px;white-space:pre-wrap;
+  }
+  .copy-msg{font-size:12px;color:var(--ok);margin-top:6px;height:14px;}
+
+  .segswitch{display:flex;border:1px solid var(--teal);border-radius:6px;overflow:hidden;}
+  .segswitch .segbtn{
+    flex:1;padding:9px 6px;background:#fff;color:var(--teal-dark);
+    border:none;font-size:12.5px;font-weight:600;
+  }
+  .segswitch .segbtn.active{background:var(--teal);color:#fff;}
+  .segswitch .segbtn:first-child{border-right:1px solid var(--teal);}
+
+  .region-opt{
+    display:flex;justify-content:space-between;align-items:center;gap:8px;
+    text-align:left;border:1px solid var(--line);background:#FCFDFD;
+    border-radius:5px;padding:9px 10px;font-size:13px;color:var(--ink);
+  }
+  .region-opt .pts{color:var(--ink-soft);font-variant-numeric:tabular-nums;font-size:12.5px;flex-shrink:0;}
+  .region-opt.selected{background:var(--teal);border-color:var(--teal-dark);color:#fff;}
+  .region-opt.selected .pts{color:#DFF3F2;}
+
+  .depth-row{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);align-items:flex-start;}
+  .depth-row:last-of-type{border-bottom:none;}
+  .depth-tag{
+    flex-shrink:0;width:88px;font-size:11px;font-weight:700;text-align:center;
+    padding:5px 4px;border-radius:5px;line-height:1.25;
+  }
+  .depth-txt{font-size:12.5px;color:var(--ink-soft);}
+  .depth-txt b{color:var(--ink);}
+
+  .palm-row{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    margin-top:8px;padding:10px;border:1px dashed var(--line);border-radius:5px;background:#FAFBFA;
+  }
+  .palm-label{display:flex;flex-direction:column;font-size:13px;}
+  .palm-label .palm-sub{font-size:11px;color:var(--ink-soft);font-weight:400;margin-top:2px;}
+  .stepper{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  .stepper button{
+    width:32px;height:32px;border-radius:50%;border:1px solid var(--teal);
+    background:#fff;color:var(--teal-dark);font-size:18px;line-height:1;font-weight:700;
+  }
+  .stepper button:active{background:var(--teal);color:#fff;}
+  .stepper span{min-width:16px;text-align:center;font-weight:700;font-variant-numeric:tabular-nums;}
+
+  footer.note{
+    font-size:11px;color:var(--ink-soft);text-align:center;padding:10px 20px 4px;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div>
+      <h1>Historia Clínica</h1>
+      <div class="sub">Funciona sin conexión a internet</div>
+    </div>
+    <div class="offline-pill">● sin conexión necesaria</div>
+  </header>
+
+  <div class="accordion" id="scoreAccordion">
+    <button class="accordion-toggle" id="accToggleBtn" type="button">
+      <span>Elegir scores a mostrar</span>
+      <span class="chev" id="accChev">▾</span>
+    </button>
+    <div class="accordion-panel" id="accPanel">
+      <label class="check-row"><input type="checkbox" data-tab="glasgow" checked> Glasgow (GCS)</label>
+      <label class="check-row"><input type="checkbox" data-tab="cramp" checked> CRAMP (triaje de trauma)</label>
+      <label class="check-row"><input type="checkbox" data-tab="quemados" checked> Quemados (regla de los 9)</label>
+    </div>
+  </div>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-view="hc">Ficha</button>
+    <button class="tab-btn" data-view="glasgow">Glasgow</button>
+    <button class="tab-btn" data-view="cramp">CRAMP</button>
+    <button class="tab-btn" data-view="quemados">Quemados</button>
+    <button class="tab-btn" data-view="resumen">Resumen</button>
+  </nav>
+
+  <!-- FICHA -->
+  <section class="view active" id="view-hc">
+    <div class="card">
+      <h2>Datos</h2>
+      <div class="row2">
+        <div>
+          <label>Paciente</label>
+          <input type="text" id="f_nombre" placeholder="Nombre y apellido">
+        </div>
+        <div>
+          <label>Edad</label>
+          <input type="text" id="f_edad" inputmode="numeric" placeholder="Ej: 34">
+        </div>
+      </div>
+      <div class="row2">
+        <div>
+          <label>Fecha</label>
+          <input type="text" id="f_fecha" placeholder="dd/mm/aaaa">
+        </div>
+        <div>
+          <label>Hora</label>
+          <input type="text" id="f_hora" placeholder="hh:mm">
+        </div>
+      </div>
+      <button class="ghost" id="btnAhora" type="button">Completar fecha/hora actual</button>
+    </div>
+
+    <div class="card">
+      <h2>Motivo de consulta</h2>
+      <textarea id="f_motivo" placeholder="Toque el micrófono del teclado para dictar"></textarea>
+    </div>
+
+    <div class="card">
+      <h2>Antecedentes</h2>
+      <textarea id="f_antecedentes" placeholder="Personales, patológicos, quirúrgicos, familiares"></textarea>
+      <label>Medicación habitual</label>
+      <textarea id="f_medicacion" placeholder="Fármaco, dosis, frecuencia" style="min-height:44px"></textarea>
+      <label>Alergias</label>
+      <textarea id="f_alergias" placeholder="Medicamentosas, alimentarias, otras. Si no refiere, anotar «niega»" style="min-height:44px"></textarea>
+    </div>
+
+    <div class="card">
+      <h2>Examen físico</h2>
+      <textarea id="f_examen" placeholder="Signos vitales, hallazgos por aparatos y sistemas" style="min-height:90px"></textarea>
+    </div>
+
+    <div class="card">
+      <h2>Diagnóstico presuntivo</h2>
+      <textarea id="f_diagnostico" placeholder="Diagnóstico / diagnósticos diferenciales"></textarea>
+    </div>
+
+    <div class="card">
+      <h2>Plan / Conducta</h2>
+      <textarea id="f_plan" placeholder="Indicaciones, tratamiento, derivación, seguimiento"></textarea>
+    </div>
+
+    <div class="voice-hint">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B6B70" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+      <span>El dictado usa el micrófono del teclado de Android. Para que funcione sin internet, descargá el paquete de reconocimiento de voz en español desde Configuración → Sistema → Idiomas → Escritura por voz.</span>
+    </div>
+  </section>
+
+  <!-- GLASGOW -->
+  <section class="view" id="view-glasgow">
+    <div class="card">
+      <h2>Escala de Glasgow (GCS)</h2>
+
+      <div class="param" data-group="ocular">
+        <div class="plabel">Apertura ocular</div>
+        <div class="options">
+          <button class="opt" data-val="4">Espontánea <span class="pts">4</span></button>
+          <button class="opt" data-val="3">Al hablarle <span class="pts">3</span></button>
+          <button class="opt" data-val="2">Al dolor <span class="pts">2</span></button>
+          <button class="opt" data-val="1">Ausente <span class="pts">1</span></button>
+        </div>
+      </div>
+
+      <div class="param" data-group="verbal">
+        <div class="plabel">Respuesta verbal</div>
+        <div class="options">
+          <button class="opt" data-val="5">Orientada <span class="pts">5</span></button>
+          <button class="opt" data-val="4">Confusa <span class="pts">4</span></button>
+          <button class="opt" data-val="3">Palabras inapropiadas <span class="pts">3</span></button>
+          <button class="opt" data-val="2">Sonidos incomprensibles <span class="pts">2</span></button>
+          <button class="opt" data-val="1">Ausente <span class="pts">1</span></button>
+        </div>
+      </div>
+
+      <div class="param" data-group="motora">
+        <div class="plabel">Respuesta motora</div>
+        <div class="options">
+          <button class="opt" data-val="6">Obedece órdenes <span class="pts">6</span></button>
+          <button class="opt" data-val="5">Localiza el dolor <span class="pts">5</span></button>
+          <button class="opt" data-val="4">Retira al dolor <span class="pts">4</span></button>
+          <button class="opt" data-val="3">Flexión anormal (decorticación) <span class="pts">3</span></button>
+          <button class="opt" data-val="2">Extensión anormal (descerebración) <span class="pts">2</span></button>
+          <button class="opt" data-val="1">Ausente <span class="pts">1</span></button>
+        </div>
+      </div>
+
+      <div class="score-total">
+        <div>
+          <div style="font-size:12px;color:var(--ink-soft);">Total GCS</div>
+          <div class="num" id="glasgow_total">—</div>
+        </div>
+        <div class="badge neutral" id="glasgow_badge">Incompleto</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CRAMP -->
+  <section class="view" id="view-cramp">
+    <div class="card">
+      <h2>Escala CRAMP (triaje de trauma)</h2>
+
+      <div class="param" data-group="circulacion">
+        <div class="plabel">Circulación</div>
+        <div class="options">
+          <button class="opt" data-val="2">Relleno capilar normal y PAS &gt; 100 mmHg <span class="pts">2</span></button>
+          <button class="opt" data-val="1">Relleno capilar lento o PAS 85–100 mmHg <span class="pts">1</span></button>
+          <button class="opt" data-val="0">Relleno capilar ausente o PAS &lt; 85 mmHg <span class="pts">0</span></button>
+        </div>
+      </div>
+
+      <div class="param" data-group="respiracion">
+        <div class="plabel">Respiración</div>
+        <div class="options">
+          <button class="opt" data-val="2">Normal <span class="pts">2</span></button>
+          <button class="opt" data-val="1">Anormal (aumentada o superficial) <span class="pts">1</span></button>
+          <button class="opt" data-val="0">Ausente <span class="pts">0</span></button>
+        </div>
+      </div>
+
+      <div class="param" data-group="abdomen">
+        <div class="plabel">Abdomen / tórax</div>
+        <div class="options">
+          <button class="opt" data-val="2">No doloroso <span class="pts">2</span></button>
+          <button class="opt" data-val="1">Doloroso <span class="pts">1</span></button>
+          <button class="opt" data-val="0">Defendido o tórax inestable <span class="pts">0</span></button>
+        </div>
+      </div>
+
+      <div class="param" data-group="motor">
+        <div class="plabel">Motor</div>
+        <div class="options">
+          <button class="opt" data-val="2">Normal <span class="pts">2</span></button>
+          <button class="opt" data-val="1">Responde solo al dolor <span class="pts">1</span></button>
+          <button class="opt" data-val="0">Postura anormal o sin respuesta <span class="pts">0</span></button>
+        </div>
+      </div>
+
+      <div class="param" data-group="palabra">
+        <div class="plabel">Palabra (lenguaje)</div>
+        <div class="options">
+          <button class="opt" data-val="2">Normal <span class="pts">2</span></button>
+          <button class="opt" data-val="1">Confusa <span class="pts">1</span></button>
+          <button class="opt" data-val="0">Ininteligible o ausente <span class="pts">0</span></button>
+        </div>
+      </div>
+
+      <div class="score-total">
+        <div>
+          <div style="font-size:12px;color:var(--ink-soft);">Total CRAMP</div>
+          <div class="num" id="cramp_total">—</div>
+        </div>
+        <div class="badge neutral" id="cramp_badge">Incompleto</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUEMADOS -->
+  <section class="view" id="view-quemados">
+    <div class="card">
+      <h2>Superficie corporal quemada — Regla de los 9 (Wallace)</h2>
+
+      <div class="segswitch" id="edadSwitch">
+        <button class="segbtn active" data-mode="adult">Adulto (&gt;10 años)</button>
+        <button class="segbtn" data-mode="child">Pediátrico (&lt;10 años)</button>
+      </div>
+
+      <div class="options" id="regionList" style="margin-top:12px;"></div>
+
+      <div class="palm-row" id="palmRow">
+        <div class="palm-label">
+          <span>Palma de la mano</span>
+          <span class="palm-sub">unidad de medida — 1% c/u, para lesiones parciales de un miembro o el tronco</span>
+        </div>
+        <div class="stepper">
+          <button type="button" id="palmMinus" aria-label="Restar">−</button>
+          <span id="palmCount">0</span>
+          <button type="button" id="palmPlus" aria-label="Sumar">+</button>
+        </div>
+      </div>
+
+      <div class="score-total">
+        <div>
+          <div style="font-size:12px;color:var(--ink-soft);">SCT quemada estimada</div>
+          <div class="num" id="scq_total">0%</div>
+        </div>
+        <div class="badge neutral" id="scq_badge">—</div>
+      </div>
+
+    </div>
+
+    <div class="card">
+      <h2>Profundidad de la quemadura</h2>
+      <div class="depth-row">
+        <div class="depth-tag" style="background:#FDECEC;color:#B3261E;">1er grado</div>
+        <div class="depth-txt"><b>Epidérmica.</b> Piel eritematosa, sin flictenas, muy dolorosa, blanquea a la presión. Cura en 3–6 días, sin cicatriz. (Ej: quemadura solar)</div>
+      </div>
+      <div class="depth-row">
+        <div class="depth-tag" style="background:#FBF3DF;color:#946B00;">2° superficial</div>
+        <div class="depth-txt"><b>Dermis papilar.</b> Flictenas, lecho rosado y húmedo, muy dolorosa, blanquea a la presión. Cura en 7–14 días, cicatriz mínima.</div>
+      </div>
+      <div class="depth-row">
+        <div class="depth-tag" style="background:#FBF3DF;color:#946B00;">2° profundo</div>
+        <div class="depth-txt"><b>Dermis reticular.</b> Lecho pálido/moteado, menos doloroso (hipoestesia), no blanquea a la presión. Cura en 3–4 semanas o requiere injerto.</div>
+      </div>
+      <div class="depth-row">
+        <div class="depth-tag" style="background:#EEF0EF;color:#3A4649;">3er / 4to grado</div>
+        <div class="depth-txt"><b>Espesor total (y subyacente).</b> Lecho blanco nacarado, acartonado o carbonizado, indoloro (destrucción de terminaciones nerviosas), no blanquea. Requiere injerto o cirugía; 4to grado compromete músculo/tendón/hueso.</div>
+      </div>
+
+      <label style="margin-top:14px;">Localización y profundidad por zona</label>
+      <textarea id="f_quemNotas" placeholder="Ej: 2° superficial en antebrazo derecho, 2° profundo en dorso de mano izquierda"></textarea>
+    </div>
+  </section>
+
+  <!-- RESUMEN -->
+  <section class="view" id="view-resumen">
+    <div class="card">
+      <h2>Resumen para copiar</h2>
+      <button class="primary" id="btnGenerar" type="button">Generar resumen</button>
+      <textarea id="resumenBox" readonly placeholder="Tocá «Generar resumen» para volcar acá todos los campos y scores completados."></textarea>
+      <button class="secondary" id="btnCopiar" type="button">Copiar al portapapeles</button>
+      <button class="ghost" id="btnCompartir" type="button">Compartir…</button>
+      <div class="copy-msg" id="copyMsg"></div>
+    </div>
+    <div class="card">
+      <h2>Nueva consulta</h2>
+      <button class="ghost" id="btnLimpiar" type="button">Borrar todos los campos</button>
+    </div>
+  </section>
+
+  <footer class="note">Herramienta de apoyo. No reemplaza el registro oficial en el sistema de historia clínica correspondiente.</footer>
+</div>
+
+<script>
+(function(){
+  // ---- Accordion: elegir scores a mostrar ----
+  const accBtn = document.getElementById('accToggleBtn');
+  const accPanel = document.getElementById('accPanel');
+  accBtn.addEventListener('click', ()=>{
+    accBtn.classList.toggle('open');
+    accPanel.classList.toggle('open');
+  });
+  document.querySelectorAll('#accPanel input[type=checkbox]').forEach(chk=>{
+    chk.addEventListener('change', ()=>{
+      const tabBtn = document.querySelector(`.tab-btn[data-view="${chk.dataset.tab}"]`);
+      tabBtn.classList.toggle('hidden-tab', !chk.checked);
+      // Si se oculta la pestaña activa, volver a la Ficha
+      if(!chk.checked && tabBtn.classList.contains('active')){
+        tabBtn.classList.remove('active');
+        document.getElementById('view-'+chk.dataset.tab).classList.remove('active');
+        document.querySelector('.tab-btn[data-view="hc"]').classList.add('active');
+        document.getElementById('view-hc').classList.add('active');
+      }
+    });
+  });
+
+  // ---- Tabs ----
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const views = document.querySelectorAll('.view');
+  tabBtns.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      tabBtns.forEach(b=>b.classList.remove('active'));
+      views.forEach(v=>v.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('view-'+btn.dataset.view).classList.add('active');
+    });
+  });
+
+  // ---- Generic score param selector ----
+  function wireParams(rootId, onChange){
+    const root = document.getElementById(rootId);
+    root.querySelectorAll('.param').forEach(param=>{
+      param.querySelectorAll('.opt').forEach(opt=>{
+        opt.addEventListener('click', ()=>{
+          param.querySelectorAll('.opt').forEach(o=>o.classList.remove('selected'));
+          opt.classList.add('selected');
+          onChange();
+        });
+      });
+    });
+  }
+
+  function getSelected(rootId){
+    const root = document.getElementById(rootId);
+    const groups = root.querySelectorAll('.param');
+    const values = {};
+    let allSelected = true;
+    groups.forEach(g=>{
+      const sel = g.querySelector('.opt.selected');
+      if(sel){ values[g.dataset.group] = parseInt(sel.dataset.val,10); }
+      else { allSelected = false; }
+    });
+    return {values, allSelected, count:groups.length};
+  }
+
+  // ---- Glasgow ----
+  function updateGlasgow(){
+    const {values, allSelected} = getSelected('view-glasgow');
+    const total = Object.values(values).reduce((a,b)=>a+b,0);
+    const totalEl = document.getElementById('glasgow_total');
+    const badge = document.getElementById('glasgow_badge');
+    if(Object.keys(values).length===0){
+      totalEl.textContent = '—'; badge.textContent='Incompleto'; badge.className='badge neutral'; return;
+    }
+    totalEl.textContent = total + (allSelected? '/15' : '/15*');
+    if(!allSelected){ badge.textContent='Faltan ítems'; badge.className='badge neutral'; return; }
+    if(total>=13){ badge.textContent='TCE leve'; badge.className='badge ok'; }
+    else if(total>=9){ badge.textContent='TCE moderado'; badge.className='badge mid'; }
+    else { badge.textContent='TCE grave'; badge.className='badge warn'; }
+  }
+  wireParams('view-glasgow', updateGlasgow);
+
+  // ---- CRAMP ----
+  function updateCramp(){
+    const {values, allSelected} = getSelected('view-cramp');
+    const total = Object.values(values).reduce((a,b)=>a+b,0);
+    const totalEl = document.getElementById('cramp_total');
+    const badge = document.getElementById('cramp_badge');
+    if(Object.keys(values).length===0){
+      totalEl.textContent = '—'; badge.textContent='Incompleto'; badge.className='badge neutral'; return;
+    }
+    totalEl.textContent = total + (allSelected? '/10' : '/10*');
+    if(!allSelected){ badge.textContent='Faltan ítems'; badge.className='badge neutral'; return; }
+    if(total>=9){ badge.textContent='Trauma leve'; badge.className='badge ok'; }
+    else { badge.textContent='Trauma grave — CRAMP ≤ 8'; badge.className='badge warn'; }
+  }
+  wireParams('view-cramp', updateCramp);
+
+  // ---- Quemados: Regla de los 9 ----
+  const regions = [
+    {id:'cabeza', label:'Cabeza y cuello', adult:9, child:18},
+    {id:'msd', label:'Miembro superior derecho', adult:9, child:9},
+    {id:'msi', label:'Miembro superior izquierdo', adult:9, child:9},
+    {id:'tronco_ant', label:'Tronco anterior', adult:18, child:18},
+    {id:'tronco_post', label:'Tronco posterior', adult:18, child:18},
+    {id:'mid', label:'Miembro inferior derecho', adult:18, child:13.5},
+    {id:'mii', label:'Miembro inferior izquierdo', adult:18, child:13.5},
+    {id:'perine', label:'Periné / genitales', adult:1, child:1},
+  ];
+  let scqMode = 'adult';
+  let palmCount = 0;
+  const regionList = document.getElementById('regionList');
+  regions.forEach(r=>{
+    const btn = document.createElement('button');
+    btn.className = 'region-opt';
+    btn.dataset.id = r.id;
+    btn.type = 'button';
+    btn.innerHTML = `<span>${r.label}</span><span class="pts">${r[scqMode]}%</span>`;
+    btn.addEventListener('click', ()=>{
+      btn.classList.toggle('selected');
+      updateQuemados();
+    });
+    regionList.appendChild(btn);
+  });
+
+  document.querySelectorAll('#edadSwitch .segbtn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#edadSwitch .segbtn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      scqMode = btn.dataset.mode;
+      regionList.querySelectorAll('.region-opt').forEach(opt=>{
+        const r = regions.find(x=>x.id===opt.dataset.id);
+        opt.querySelector('.pts').textContent = r[scqMode] + '%';
+      });
+      updateQuemados();
+    });
+  });
+
+  function updateQuemados(){
+    let total = 0;
+    const selected = [];
+    regionList.querySelectorAll('.region-opt.selected').forEach(opt=>{
+      const r = regions.find(x=>x.id===opt.dataset.id);
+      total += r[scqMode];
+      selected.push(`${r.label} (${r[scqMode]}%)`);
+    });
+    total += palmCount;
+    document.getElementById('scq_total').textContent = (Math.round(total*10)/10) + '%';
+    const badge = document.getElementById('scq_badge');
+    if(selected.length===0 && palmCount===0){ badge.textContent='—'; badge.className='badge neutral'; return; }
+    const umbralGrave = scqMode==='adult' ? 25 : 10;
+    if(total >= umbralGrave){ badge.textContent='Gran quemado'; badge.className='badge warn'; }
+    else if(total >= (scqMode==='adult'?15:10)){ badge.textContent='Moderado'; badge.className='badge mid'; }
+    else { badge.textContent='Leve'; badge.className='badge ok'; }
+  }
+
+  document.getElementById('palmMinus').addEventListener('click', ()=>{
+    if(palmCount>0){ palmCount--; document.getElementById('palmCount').textContent = palmCount; updateQuemados(); }
+  });
+  document.getElementById('palmPlus').addEventListener('click', ()=>{
+    palmCount++; document.getElementById('palmCount').textContent = palmCount; updateQuemados();
+  });
+
+  // ---- Fecha/hora actual ----
+  document.getElementById('btnAhora').addEventListener('click', ()=>{
+    const now = new Date();
+    const pad = n => String(n).padStart(2,'0');
+    document.getElementById('f_fecha').value = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
+    document.getElementById('f_hora').value = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  });
+
+  // ---- Resumen ----
+  const glasgowLabels = {ocular:'Apertura ocular', verbal:'Respuesta verbal', motora:'Respuesta motora'};
+  const crampLabels = {circulacion:'Circulación', respiracion:'Respiración', abdomen:'Abdomen/tórax', motor:'Motor', palabra:'Palabra'};
+
+  function scoreLines(rootId, labels){
+    const root = document.getElementById(rootId);
+    const lines = [];
+    root.querySelectorAll('.param').forEach(g=>{
+      const sel = g.querySelector('.opt.selected');
+      if(sel){
+        const text = sel.childNodes[0].textContent.trim();
+        lines.push(`  - ${labels[g.dataset.group]}: ${text} (${sel.dataset.val} pts)`);
+      }
+    });
+    return lines;
+  }
+
+  function generarResumen(){
+    const v = id => document.getElementById(id).value.trim();
+    let out = '';
+    out += `HISTORIA CLÍNICA\n`;
+    out += `Fecha/hora: ${v('f_fecha')} ${v('f_hora')}\n`;
+    out += `Paciente: ${v('f_nombre')}   Edad: ${v('f_edad')}\n\n`;
+    out += `MOTIVO DE CONSULTA\n${v('f_motivo') || '-'}\n\n`;
+    out += `ANTECEDENTES\n${v('f_antecedentes') || '-'}\n\n`;
+    out += `MEDICACIÓN HABITUAL\n${v('f_medicacion') || '-'}\n\n`;
+    out += `ALERGIAS\n${v('f_alergias') || '-'}\n\n`;
+    out += `EXAMEN FÍSICO\n${v('f_examen') || '-'}\n\n`;
+    out += `DIAGNÓSTICO PRESUNTIVO\n${v('f_diagnostico') || '-'}\n\n`;
+    out += `PLAN / CONDUCTA\n${v('f_plan') || '-'}\n`;
+
+    const gTotalTxt = document.getElementById('glasgow_total').textContent;
+    if(gTotalTxt !== '—'){
+      out += `\nESCALA DE GLASGOW: ${gTotalTxt}  (${document.getElementById('glasgow_badge').textContent})\n`;
+      out += scoreLines('view-glasgow', glasgowLabels).join('\n') + '\n';
+    }
+    const cTotalTxt = document.getElementById('cramp_total').textContent;
+    if(cTotalTxt !== '—'){
+      out += `\nESCALA CRAMP: ${cTotalTxt}  (${document.getElementById('cramp_badge').textContent})\n`;
+      out += scoreLines('view-cramp', crampLabels).join('\n') + '\n';
+    }
+
+    const scqTotal = document.getElementById('scq_total').textContent;
+    const scqSelected = [];
+    document.querySelectorAll('#regionList .region-opt.selected').forEach(opt=>{
+      const r = regions.find(x=>x.id===opt.dataset.id);
+      scqSelected.push(`  - ${r.label}: ${r[scqMode]}%`);
+    });
+    const quemNotas = v('f_quemNotas');
+    if(scqTotal !== '0%' || quemNotas){
+      out += `\nQUEMADOS — SCT (${scqMode==='adult'?'adulto':'pediátrico'}): ${scqTotal}  (${document.getElementById('scq_badge').textContent})\n`;
+      if(scqSelected.length) out += scqSelected.join('\n') + '\n';
+      if(palmCount>0) out += `  - Palma de la mano x${palmCount}: ${palmCount}%\n`;
+      if(quemNotas) out += `  Profundidad/localización: ${quemNotas}\n`;
+    }
+    document.getElementById('resumenBox').value = out;
+  }
+  document.getElementById('btnGenerar').addEventListener('click', generarResumen);
+
+  document.getElementById('btnCopiar').addEventListener('click', async ()=>{
+    const box = document.getElementById('resumenBox');
+    const msg = document.getElementById('copyMsg');
+    if(!box.value){ generarResumen(); }
+    try{
+      box.select();
+      box.setSelectionRange(0, 999999);
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        await navigator.clipboard.writeText(box.value);
+      } else {
+        document.execCommand('copy');
+      }
+      msg.textContent = 'Copiado ✓';
+      setTimeout(()=>{msg.textContent='';}, 2000);
+    }catch(e){
+      msg.textContent = 'No se pudo copiar automáticamente, seleccioná y copiá el texto manualmente.';
+    }
+  });
+
+  document.getElementById('btnCompartir').addEventListener('click', async ()=>{
+    const box = document.getElementById('resumenBox');
+    if(!box.value){ generarResumen(); }
+    if(navigator.share){
+      try{ await navigator.share({text: box.value}); }catch(e){}
+    } else {
+      document.getElementById('copyMsg').textContent = 'Compartir no disponible en este navegador; usá "Copiar".';
+    }
+  });
+
+  document.getElementById('btnLimpiar').addEventListener('click', ()=>{
+    if(!confirm('¿Borrar todos los campos y scores?')) return;
+    ['f_nombre','f_edad','f_fecha','f_hora','f_motivo','f_antecedentes','f_medicacion','f_alergias','f_examen','f_diagnostico','f_plan'].forEach(id=>{
+      document.getElementById(id).value='';
+    });
+    document.querySelectorAll('.opt.selected').forEach(o=>o.classList.remove('selected'));
+    document.querySelectorAll('.region-opt.selected').forEach(o=>o.classList.remove('selected'));
+    palmCount = 0;
+    document.getElementById('palmCount').textContent = '0';
+    document.getElementById('f_quemNotas').value = '';
+    updateGlasgow(); updateCramp(); updateQuemados();
+    document.getElementById('resumenBox').value='';
+  });
+})();
+</script>
+</body>
+</html>
