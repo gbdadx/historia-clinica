@@ -1,290 +1,310 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>Historia Clínica — Offline</title>
-<link rel="icon"  href="./img/OrangeFavicon.png" type="image/x-icon">
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>Historia Clínica — Offline</title>
+  <link rel="icon" href="./img/OrangeFavicon.png" type="image/x-icon">
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-<div class="app">
+  <div class="app">
 
-  <header>
-    <div>
-      <h1>Historia Clínica</h1>
-      <div class="sub">Funciona sin conexión a internet</div>
-    </div>
-    <div class="offline-pill">● sin conexión necesaria</div>
-  </header>
+    <header>
+      <div>
+        <h1>Historia Clínica</h1>
+        <div class="sub">Funciona sin conexión a internet</div>
+      </div>
+      <div class="offline-pill">● sin conexión necesaria</div>
+    </header>
 
-  <div class="accordion" id="scoreAccordion">
-    <button class="accordion-toggle" id="accToggleBtn" type="button">
-      <span>Elegir scores a mostrar</span>
-      <span class="chev" id="accChev">▾</span>
-    </button>
-    <div class="accordion-panel" id="accPanel">
-      <label class="check-row"><input type="checkbox" data-tab="glasgow" checked> Glasgow (GCS)</label>
-      <label class="check-row"><input type="checkbox" data-tab="cramp" checked> CRAMP (triaje de trauma)</label>
-      <label class="check-row"><input type="checkbox" data-tab="quemados" checked> Quemados (regla de los 9)</label>
+    <div class="accordion" id="scoreAccordion">
+      <button class="accordion-toggle" id="accToggleBtn" type="button">
+        <span>Elegir scores a mostrar</span>
+        <span class="chev" id="accChev">▾</span>
+      </button>
+      <div class="accordion-panel" id="accPanel">
+        <label class="check-row"><input type="checkbox" data-tab="glasgow" checked> Glasgow (GCS)</label>
+        <label class="check-row"><input type="checkbox" data-tab="cramp" checked> CRAMP (triaje de trauma)</label>
+        <label class="check-row"><input type="checkbox" data-tab="quemados" checked> Quemados (regla de los 9)</label>
+      </div>
     </div>
+
+    <nav class="tabs">
+      <button class="tab-btn active" data-view="hc">Ficha</button>
+      <button class="tab-btn" data-view="glasgow">Glasgow</button>
+      <button class="tab-btn" data-view="cramp">CRAMP</button>
+      <button class="tab-btn" data-view="quemados">Quemados</button>
+      <button class="tab-btn" data-view="resumen">Resumen</button>
+    </nav>
+
+    <!-- FICHA -->
+    <section class="view active" id="view-hc">
+      <div class="card">
+        <h2>Datos</h2>
+        <div class="row2">
+          <div>
+            <label>Paciente</label>
+            <input type="text" id="f_nombre" placeholder="Nombre y apellido">
+          </div>
+          <div>
+            <label>Edad</label>
+            <input type="text" id="f_edad" inputmode="numeric" placeholder="Ej: 34">
+          </div>
+        </div>
+        <div class="row2">
+          <div>
+            <label>Fecha</label>
+            <input type="text" id="f_fecha" placeholder="dd/mm/aaaa">
+          </div>
+          <div>
+            <label>Hora</label>
+            <input type="text" id="f_hora" placeholder="hh:mm">
+          </div>
+        </div>
+        <button class="ghost" id="btnAhora" type="button">Completar fecha/hora actual</button>
+      </div>
+
+      <div class="card">
+        <h2>Motivo de consulta</h2>
+        <textarea id="f_motivo" placeholder="Toque el micrófono del teclado para dictar"></textarea>
+      </div>
+
+      <div class="card">
+        <h2>Antecedentes</h2>
+        <textarea id="f_antecedentes" placeholder="Personales, patológicos, quirúrgicos, familiares"></textarea>
+        <label>Medicación habitual</label>
+        <textarea id="f_medicacion" placeholder="Fármaco, dosis, frecuencia" style="min-height:44px"></textarea>
+        <label>Alergias</label>
+        <textarea id="f_alergias" placeholder="Medicamentosas, alimentarias, otras. Si no refiere, anotar «niega»"
+          style="min-height:44px"></textarea>
+      </div>
+
+      <div class="card">
+        <h2>Examen físico</h2>
+        <textarea id="f_examen" placeholder="Signos vitales, hallazgos por aparatos y sistemas"
+          style="min-height:90px"></textarea>
+      </div>
+
+      <div class="card">
+        <h2>Diagnóstico presuntivo</h2>
+        <textarea id="f_diagnostico" placeholder="Diagnóstico / diagnósticos diferenciales"></textarea>
+      </div>
+
+      <div class="card">
+        <h2>Plan / Conducta</h2>
+        <textarea id="f_plan" placeholder="Indicaciones, tratamiento, derivación, seguimiento"></textarea>
+      </div>
+
+      <div class="voice-hint">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B6B70" stroke-width="2">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+          <line x1="12" y1="19" x2="12" y2="23" />
+        </svg>
+        <span>El dictado usa el micrófono del teclado de Android. Para que funcione sin internet, descargá el paquete de
+          reconocimiento de voz en español desde Configuración → Sistema → Idiomas → Escritura por voz.</span>
+      </div>
+    </section>
+
+    <!-- GLASGOW -->
+    <section class="view" id="view-glasgow">
+      <div class="card">
+        <h2>Escala de Glasgow (GCS)</h2>
+
+        <div class="param" data-group="ocular">
+          <div class="plabel">Apertura ocular</div>
+          <div class="options">
+            <button class="opt" data-val="4">Espontánea <span class="pts">4</span></button>
+            <button class="opt" data-val="3">Al hablarle <span class="pts">3</span></button>
+            <button class="opt" data-val="2">Al dolor <span class="pts">2</span></button>
+            <button class="opt" data-val="1">Ausente <span class="pts">1</span></button>
+          </div>
+        </div>
+
+        <div class="param" data-group="verbal">
+          <div class="plabel">Respuesta verbal</div>
+          <div class="options">
+            <button class="opt" data-val="5">Orientada <span class="pts">5</span></button>
+            <button class="opt" data-val="4">Confusa <span class="pts">4</span></button>
+            <button class="opt" data-val="3">Palabras inapropiadas <span class="pts">3</span></button>
+            <button class="opt" data-val="2">Sonidos incomprensibles <span class="pts">2</span></button>
+            <button class="opt" data-val="1">Ausente <span class="pts">1</span></button>
+          </div>
+        </div>
+
+        <div class="param" data-group="motora">
+          <div class="plabel">Respuesta motora</div>
+          <div class="options">
+            <button class="opt" data-val="6">Obedece órdenes <span class="pts">6</span></button>
+            <button class="opt" data-val="5">Localiza el dolor <span class="pts">5</span></button>
+            <button class="opt" data-val="4">Retira al dolor <span class="pts">4</span></button>
+            <button class="opt" data-val="3">Flexión anormal (decorticación) <span class="pts">3</span></button>
+            <button class="opt" data-val="2">Extensión anormal (descerebración) <span class="pts">2</span></button>
+            <button class="opt" data-val="1">Ausente <span class="pts">1</span></button>
+          </div>
+        </div>
+
+        <div class="score-total">
+          <div>
+            <div style="font-size:12px;color:var(--ink-soft);">Total GCS</div>
+            <div class="num" id="glasgow_total">—</div>
+          </div>
+          <div class="badge neutral" id="glasgow_badge">Incompleto</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CRAMP -->
+    <section class="view" id="view-cramp">
+      <div class="card">
+        <h2>Escala CRAMP (triaje de trauma)</h2>
+
+        <div class="param" data-group="circulacion">
+          <div class="plabel">Circulación</div>
+          <div class="options">
+            <button class="opt" data-val="2">Relleno capilar normal y PAS &gt; 100 mmHg <span
+                class="pts">2</span></button>
+            <button class="opt" data-val="1">Relleno capilar lento o PAS 85–100 mmHg <span class="pts">1</span></button>
+            <button class="opt" data-val="0">Relleno capilar ausente o PAS &lt; 85 mmHg <span
+                class="pts">0</span></button>
+          </div>
+        </div>
+
+        <div class="param" data-group="respiracion">
+          <div class="plabel">Respiración</div>
+          <div class="options">
+            <button class="opt" data-val="2">Normal <span class="pts">2</span></button>
+            <button class="opt" data-val="1">Anormal (aumentada o superficial) <span class="pts">1</span></button>
+            <button class="opt" data-val="0">Ausente <span class="pts">0</span></button>
+          </div>
+        </div>
+
+        <div class="param" data-group="abdomen">
+          <div class="plabel">Abdomen / tórax</div>
+          <div class="options">
+            <button class="opt" data-val="2">No doloroso <span class="pts">2</span></button>
+            <button class="opt" data-val="1">Doloroso <span class="pts">1</span></button>
+            <button class="opt" data-val="0">Defendido o tórax inestable <span class="pts">0</span></button>
+          </div>
+        </div>
+
+        <div class="param" data-group="motor">
+          <div class="plabel">Motor</div>
+          <div class="options">
+            <button class="opt" data-val="2">Normal <span class="pts">2</span></button>
+            <button class="opt" data-val="1">Responde solo al dolor <span class="pts">1</span></button>
+            <button class="opt" data-val="0">Postura anormal o sin respuesta <span class="pts">0</span></button>
+          </div>
+        </div>
+
+        <div class="param" data-group="palabra">
+          <div class="plabel">Palabra (lenguaje)</div>
+          <div class="options">
+            <button class="opt" data-val="2">Normal <span class="pts">2</span></button>
+            <button class="opt" data-val="1">Confusa <span class="pts">1</span></button>
+            <button class="opt" data-val="0">Ininteligible o ausente <span class="pts">0</span></button>
+          </div>
+        </div>
+
+        <div class="score-total">
+          <div>
+            <div style="font-size:12px;color:var(--ink-soft);">Total CRAMP</div>
+            <div class="num" id="cramp_total">—</div>
+          </div>
+          <div class="badge neutral" id="cramp_badge">Incompleto</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUEMADOS -->
+    <section class="view" id="view-quemados">
+      <div class="card">
+        <h2>Superficie corporal quemada — Regla de los 9 (Wallace)</h2>
+
+        <div class="segswitch" id="edadSwitch">
+          <button class="segbtn active" data-mode="adult">Adulto (&gt;10 años)</button>
+          <button class="segbtn" data-mode="child">Pediátrico (&lt;10 años)</button>
+        </div>
+
+        <div class="options" id="regionList" style="margin-top:12px;"></div>
+
+        <div class="palm-row" id="palmRow">
+          <div class="palm-label">
+            <span>Palma de la mano</span>
+            <span class="palm-sub">unidad de medida — 1% c/u, para lesiones parciales de un miembro o el tronco</span>
+          </div>
+          <div class="stepper">
+            <button type="button" id="palmMinus" aria-label="Restar">−</button>
+            <span id="palmCount">0</span>
+            <button type="button" id="palmPlus" aria-label="Sumar">+</button>
+          </div>
+        </div>
+
+        <div class="score-total">
+          <div>
+            <div style="font-size:12px;color:var(--ink-soft);">SCT quemada estimada</div>
+            <div class="num" id="scq_total">0%</div>
+          </div>
+          <div class="badge neutral" id="scq_badge">—</div>
+        </div>
+
+      </div>
+
+      <div class="card">
+        <h2>Profundidad de la quemadura</h2>
+        <div class="depth-row">
+          <div class="depth-tag" style="background:#FDECEC;color:#B3261E;">1er grado</div>
+          <div class="depth-txt"><b>Epidérmica.</b> Piel eritematosa, sin flictenas, muy dolorosa, blanquea a la
+            presión. Cura en 3–6 días, sin cicatriz. (Ej: quemadura solar)</div>
+        </div>
+        <div class="depth-row">
+          <div class="depth-tag" style="background:#FBF3DF;color:#946B00;">2° superficial</div>
+          <div class="depth-txt"><b>Dermis papilar.</b> Flictenas, lecho rosado y húmedo, muy dolorosa, blanquea a la
+            presión. Cura en 7–14 días, cicatriz mínima.</div>
+        </div>
+        <div class="depth-row">
+          <div class="depth-tag" style="background:#FBF3DF;color:#946B00;">2° profundo</div>
+          <div class="depth-txt"><b>Dermis reticular.</b> Lecho pálido/moteado, menos doloroso (hipoestesia), no
+            blanquea a la presión. Cura en 3–4 semanas o requiere injerto.</div>
+        </div>
+        <div class="depth-row">
+          <div class="depth-tag" style="background:#EEF0EF;color:#3A4649;">3er / 4to grado</div>
+          <div class="depth-txt"><b>Espesor total (y subyacente).</b> Lecho blanco nacarado, acartonado o carbonizado,
+            indoloro (destrucción de terminaciones nerviosas), no blanquea. Requiere injerto o cirugía; 4to grado
+            compromete músculo/tendón/hueso.</div>
+        </div>
+
+        <label style="margin-top:14px;">Localización y profundidad por zona</label>
+        <textarea id="f_quemNotas"
+          placeholder="Ej: 2° superficial en antebrazo derecho, 2° profundo en dorso de mano izquierda"></textarea>
+      </div>
+    </section>
+
+    <!-- RESUMEN -->
+    <section class="view" id="view-resumen">
+      <div class="card">
+        <h2>Resumen para copiar</h2>
+        <button class="primary" id="btnGenerar" type="button">Generar resumen</button>
+        <textarea id="resumenBox" readonly
+          placeholder="Tocá «Generar resumen» para volcar acá todos los campos y scores completados."></textarea>
+        <button class="secondary" id="btnCopiar" type="button">Copiar al portapapeles</button>
+        <button class="ghost" id="btnCompartir" type="button">Compartir…</button>
+        <div class="copy-msg" id="copyMsg"></div>
+      </div>
+      <div class="card">
+        <h2>Nueva consulta</h2>
+        <button class="ghost" id="btnLimpiar" type="button">Borrar todos los campos</button>
+      </div>
+    </section>
+
+    <footer class="note">Herramienta de apoyo. No reemplaza el registro oficial en el sistema de historia clínica
+      correspondiente.</footer>
   </div>
-
-  <nav class="tabs">
-    <button class="tab-btn active" data-view="hc">Ficha</button>
-    <button class="tab-btn" data-view="glasgow">Glasgow</button>
-    <button class="tab-btn" data-view="cramp">CRAMP</button>
-    <button class="tab-btn" data-view="quemados">Quemados</button>
-    <button class="tab-btn" data-view="resumen">Resumen</button>
-  </nav>
-
-  <!-- FICHA -->
-  <section class="view active" id="view-hc">
-    <div class="card">
-      <h2>Datos</h2>
-      <div class="row2">
-        <div>
-          <label>Paciente</label>
-          <input type="text" id="f_nombre" placeholder="Nombre y apellido">
-        </div>
-        <div>
-          <label>Edad</label>
-          <input type="text" id="f_edad" inputmode="numeric" placeholder="Ej: 34">
-        </div>
-      </div>
-      <div class="row2">
-        <div>
-          <label>Fecha</label>
-          <input type="text" id="f_fecha" placeholder="dd/mm/aaaa">
-        </div>
-        <div>
-          <label>Hora</label>
-          <input type="text" id="f_hora" placeholder="hh:mm">
-        </div>
-      </div>
-      <button class="ghost" id="btnAhora" type="button">Completar fecha/hora actual</button>
-    </div>
-
-    <div class="card">
-      <h2>Motivo de consulta</h2>
-      <textarea id="f_motivo" placeholder="Toque el micrófono del teclado para dictar"></textarea>
-    </div>
-
-    <div class="card">
-      <h2>Antecedentes</h2>
-      <textarea id="f_antecedentes" placeholder="Personales, patológicos, quirúrgicos, familiares"></textarea>
-      <label>Medicación habitual</label>
-      <textarea id="f_medicacion" placeholder="Fármaco, dosis, frecuencia" style="min-height:44px"></textarea>
-      <label>Alergias</label>
-      <textarea id="f_alergias" placeholder="Medicamentosas, alimentarias, otras. Si no refiere, anotar «niega»" style="min-height:44px"></textarea>
-    </div>
-
-    <div class="card">
-      <h2>Examen físico</h2>
-      <textarea id="f_examen" placeholder="Signos vitales, hallazgos por aparatos y sistemas" style="min-height:90px"></textarea>
-    </div>
-
-    <div class="card">
-      <h2>Diagnóstico presuntivo</h2>
-      <textarea id="f_diagnostico" placeholder="Diagnóstico / diagnósticos diferenciales"></textarea>
-    </div>
-
-    <div class="card">
-      <h2>Plan / Conducta</h2>
-      <textarea id="f_plan" placeholder="Indicaciones, tratamiento, derivación, seguimiento"></textarea>
-    </div>
-
-    <div class="voice-hint">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B6B70" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
-      <span>El dictado usa el micrófono del teclado de Android. Para que funcione sin internet, descargá el paquete de reconocimiento de voz en español desde Configuración → Sistema → Idiomas → Escritura por voz.</span>
-    </div>
-  </section>
-
-  <!-- GLASGOW -->
-  <section class="view" id="view-glasgow">
-    <div class="card">
-      <h2>Escala de Glasgow (GCS)</h2>
-
-      <div class="param" data-group="ocular">
-        <div class="plabel">Apertura ocular</div>
-        <div class="options">
-          <button class="opt" data-val="4">Espontánea <span class="pts">4</span></button>
-          <button class="opt" data-val="3">Al hablarle <span class="pts">3</span></button>
-          <button class="opt" data-val="2">Al dolor <span class="pts">2</span></button>
-          <button class="opt" data-val="1">Ausente <span class="pts">1</span></button>
-        </div>
-      </div>
-
-      <div class="param" data-group="verbal">
-        <div class="plabel">Respuesta verbal</div>
-        <div class="options">
-          <button class="opt" data-val="5">Orientada <span class="pts">5</span></button>
-          <button class="opt" data-val="4">Confusa <span class="pts">4</span></button>
-          <button class="opt" data-val="3">Palabras inapropiadas <span class="pts">3</span></button>
-          <button class="opt" data-val="2">Sonidos incomprensibles <span class="pts">2</span></button>
-          <button class="opt" data-val="1">Ausente <span class="pts">1</span></button>
-        </div>
-      </div>
-
-      <div class="param" data-group="motora">
-        <div class="plabel">Respuesta motora</div>
-        <div class="options">
-          <button class="opt" data-val="6">Obedece órdenes <span class="pts">6</span></button>
-          <button class="opt" data-val="5">Localiza el dolor <span class="pts">5</span></button>
-          <button class="opt" data-val="4">Retira al dolor <span class="pts">4</span></button>
-          <button class="opt" data-val="3">Flexión anormal (decorticación) <span class="pts">3</span></button>
-          <button class="opt" data-val="2">Extensión anormal (descerebración) <span class="pts">2</span></button>
-          <button class="opt" data-val="1">Ausente <span class="pts">1</span></button>
-        </div>
-      </div>
-
-      <div class="score-total">
-        <div>
-          <div style="font-size:12px;color:var(--ink-soft);">Total GCS</div>
-          <div class="num" id="glasgow_total">—</div>
-        </div>
-        <div class="badge neutral" id="glasgow_badge">Incompleto</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CRAMP -->
-  <section class="view" id="view-cramp">
-    <div class="card">
-      <h2>Escala CRAMP (triaje de trauma)</h2>
-
-      <div class="param" data-group="circulacion">
-        <div class="plabel">Circulación</div>
-        <div class="options">
-          <button class="opt" data-val="2">Relleno capilar normal y PAS &gt; 100 mmHg <span class="pts">2</span></button>
-          <button class="opt" data-val="1">Relleno capilar lento o PAS 85–100 mmHg <span class="pts">1</span></button>
-          <button class="opt" data-val="0">Relleno capilar ausente o PAS &lt; 85 mmHg <span class="pts">0</span></button>
-        </div>
-      </div>
-
-      <div class="param" data-group="respiracion">
-        <div class="plabel">Respiración</div>
-        <div class="options">
-          <button class="opt" data-val="2">Normal <span class="pts">2</span></button>
-          <button class="opt" data-val="1">Anormal (aumentada o superficial) <span class="pts">1</span></button>
-          <button class="opt" data-val="0">Ausente <span class="pts">0</span></button>
-        </div>
-      </div>
-
-      <div class="param" data-group="abdomen">
-        <div class="plabel">Abdomen / tórax</div>
-        <div class="options">
-          <button class="opt" data-val="2">No doloroso <span class="pts">2</span></button>
-          <button class="opt" data-val="1">Doloroso <span class="pts">1</span></button>
-          <button class="opt" data-val="0">Defendido o tórax inestable <span class="pts">0</span></button>
-        </div>
-      </div>
-
-      <div class="param" data-group="motor">
-        <div class="plabel">Motor</div>
-        <div class="options">
-          <button class="opt" data-val="2">Normal <span class="pts">2</span></button>
-          <button class="opt" data-val="1">Responde solo al dolor <span class="pts">1</span></button>
-          <button class="opt" data-val="0">Postura anormal o sin respuesta <span class="pts">0</span></button>
-        </div>
-      </div>
-
-      <div class="param" data-group="palabra">
-        <div class="plabel">Palabra (lenguaje)</div>
-        <div class="options">
-          <button class="opt" data-val="2">Normal <span class="pts">2</span></button>
-          <button class="opt" data-val="1">Confusa <span class="pts">1</span></button>
-          <button class="opt" data-val="0">Ininteligible o ausente <span class="pts">0</span></button>
-        </div>
-      </div>
-
-      <div class="score-total">
-        <div>
-          <div style="font-size:12px;color:var(--ink-soft);">Total CRAMP</div>
-          <div class="num" id="cramp_total">—</div>
-        </div>
-        <div class="badge neutral" id="cramp_badge">Incompleto</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- QUEMADOS -->
-  <section class="view" id="view-quemados">
-    <div class="card">
-      <h2>Superficie corporal quemada — Regla de los 9 (Wallace)</h2>
-
-      <div class="segswitch" id="edadSwitch">
-        <button class="segbtn active" data-mode="adult">Adulto (&gt;10 años)</button>
-        <button class="segbtn" data-mode="child">Pediátrico (&lt;10 años)</button>
-      </div>
-
-      <div class="options" id="regionList" style="margin-top:12px;"></div>
-
-      <div class="palm-row" id="palmRow">
-        <div class="palm-label">
-          <span>Palma de la mano</span>
-          <span class="palm-sub">unidad de medida — 1% c/u, para lesiones parciales de un miembro o el tronco</span>
-        </div>
-        <div class="stepper">
-          <button type="button" id="palmMinus" aria-label="Restar">−</button>
-          <span id="palmCount">0</span>
-          <button type="button" id="palmPlus" aria-label="Sumar">+</button>
-        </div>
-      </div>
-
-      <div class="score-total">
-        <div>
-          <div style="font-size:12px;color:var(--ink-soft);">SCT quemada estimada</div>
-          <div class="num" id="scq_total">0%</div>
-        </div>
-        <div class="badge neutral" id="scq_badge">—</div>
-      </div>
-
-    </div>
-
-    <div class="card">
-      <h2>Profundidad de la quemadura</h2>
-      <div class="depth-row">
-        <div class="depth-tag" style="background:#FDECEC;color:#B3261E;">1er grado</div>
-        <div class="depth-txt"><b>Epidérmica.</b> Piel eritematosa, sin flictenas, muy dolorosa, blanquea a la presión. Cura en 3–6 días, sin cicatriz. (Ej: quemadura solar)</div>
-      </div>
-      <div class="depth-row">
-        <div class="depth-tag" style="background:#FBF3DF;color:#946B00;">2° superficial</div>
-        <div class="depth-txt"><b>Dermis papilar.</b> Flictenas, lecho rosado y húmedo, muy dolorosa, blanquea a la presión. Cura en 7–14 días, cicatriz mínima.</div>
-      </div>
-      <div class="depth-row">
-        <div class="depth-tag" style="background:#FBF3DF;color:#946B00;">2° profundo</div>
-        <div class="depth-txt"><b>Dermis reticular.</b> Lecho pálido/moteado, menos doloroso (hipoestesia), no blanquea a la presión. Cura en 3–4 semanas o requiere injerto.</div>
-      </div>
-      <div class="depth-row">
-        <div class="depth-tag" style="background:#EEF0EF;color:#3A4649;">3er / 4to grado</div>
-        <div class="depth-txt"><b>Espesor total (y subyacente).</b> Lecho blanco nacarado, acartonado o carbonizado, indoloro (destrucción de terminaciones nerviosas), no blanquea. Requiere injerto o cirugía; 4to grado compromete músculo/tendón/hueso.</div>
-      </div>
-
-      <label style="margin-top:14px;">Localización y profundidad por zona</label>
-      <textarea id="f_quemNotas" placeholder="Ej: 2° superficial en antebrazo derecho, 2° profundo en dorso de mano izquierda"></textarea>
-    </div>
-  </section>
-
-  <!-- RESUMEN -->
-  <section class="view" id="view-resumen">
-    <div class="card">
-      <h2>Resumen para copiar</h2>
-      <button class="primary" id="btnGenerar" type="button">Generar resumen</button>
-      <textarea id="resumenBox" readonly placeholder="Tocá «Generar resumen» para volcar acá todos los campos y scores completados."></textarea>
-      <button class="secondary" id="btnCopiar" type="button">Copiar al portapapeles</button>
-      <button class="ghost" id="btnCompartir" type="button">Compartir…</button>
-      <div class="copy-msg" id="copyMsg"></div>
-    </div>
-    <div class="card">
-      <h2>Nueva consulta</h2>
-      <button class="ghost" id="btnLimpiar" type="button">Borrar todos los campos</button>
-    </div>
-  </section>
-
-  <footer class="note">Herramienta de apoyo. No reemplaza el registro oficial en el sistema de historia clínica correspondiente.</footer>
-</div>
-<script src="script.js"></script>
+  <script src="script.js"></script>
 
 </body>
+
 </html>
