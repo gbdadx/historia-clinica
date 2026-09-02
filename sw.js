@@ -1,58 +1,77 @@
 const CACHE_NAME = 'anotador-guardia-v2';
-const ASSETS = [
+const OFFLINE_URL = '/offline.html';
+const PRECACHE = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/img/GreenFavicon.png'
+  '/img/GreenFavicon.png',
+  OFFLINE_URL
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(ASSETS))
-      .then(() => self.skipWaiting())
-  );
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    // Intent: cache what we can but don't fail installation if some fetches fail
+    await Promise.all(PRECACHE.map(async (url) => {
+      try {
+        const res = await fetch(url, {cache: 'no-cache'});
+        if (res && res.ok) {
+          await cache.put(url, res.clone());
+        } else {
+          console.warn('Precaching failed (no-ok):', url, res && res.status);
+        }
+      } catch (err) {
+        console.warn('Precaching failed (fetch error):', url, err);
+      }
+    }));
+    await self.skipWaiting();
+  })());
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys.map((key) => (key !== CACHE_NAME ? caches.delete(key) : Promise.resolve()))
-      )
-    ).then(() => self.clients.claim())
-  );
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.map((key) => key !== CACHE_NAME ? caches.delete(key) : Promise.resolve()));
+    await self.clients.claim();
+  })());
 });
 
 self.addEventListener('fetch', (event) => {
   const req = event.request;
 
-  // App shell / navigation requests: respond from cache (index.html) for reliable offline
+  // Navigation (HTML pages): network-first with fallback to cache/offline
   if (req.mode === 'navigate') {
-    event.respondWith(
-      caches.match('/index.html').then((cached) => cached || fetch('/index.html'))
-    );
+    event.respondWith((async () => {
+      try {
+        const networkResponse = await fetch(req);
+        // update cached index.html for future navigations
+        const cache = await caches.open(CACHE_NAME);
+        cache.put('/index.html', networkResponse.clone()).catch(() => {});
+        return networkResponse;
+      } catch (err) {
+        const cached = await caches.match('/index.html');
+        if (cached) return cached;
+        return caches.match(OFFLINE_URL);
+      }
+    })());
     return;
   }
 
-  // For same-origin GET requests, try cache first then network and update cache
+  // Assets same-origin: cache-first, then update from network
   if (req.method === 'GET' && req.url.startsWith(self.location.origin)) {
-    event.respondWith(
-      caches.match(req).then((cached) => {
-        if (cached) return cached;
-        return fetch(req).then((networkRes) => {
-          // put a copy in cache for future
-          return caches.open(CACHE_NAME).then((cache) => {
-            try {
-              cache.put(req, networkRes.clone());
-            } catch (e) {
-              // some responses aren't cacheable; ignore errors
-            }
-            return networkRes;
-          });
-        }).catch(() => caches.match('/index.html'));
-      })
-    );
+    event.respondWith((async () => {
+      const cached = await caches.match(req);
+      if (cached) return cached;
+      try {
+        const networkRes = await fetch(req);
+        if (networkRes && networkRes.ok) {
+          const cache = await caches.open(CACHE_NAME);
+          cache.put(req, networkRes.clone()).catch(() => {});
+        }
+        return networkRes;
+      } catch (err) {
+        return caches.match('/index.html');
+      }
+    })());
   }
-  // For other requests (cross-origin), use network as default
 });
