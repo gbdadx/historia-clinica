@@ -2,15 +2,12 @@
   "name": "Anotador de Guardia",
   "short_name": "Guardia",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#F5F6F4",
   "theme_color": "#0E7C7B",
   "orientation": "portrait",
   "icons": [
-    {
-      "src": "https://flaticon.com",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
+    { "src": "img/GreenFavicon.png", "sizes": "512x512", "type": "image/png" }
   ]
 }
