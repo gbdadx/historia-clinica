@@ -1,4 +1,4 @@
-const CACHE_NAME = 'anotador-guardia-v2'; // subí este número cada vez que cambies index.html
+const CACHE_NAME = 'anotador-guardia-v5'; // subí este número cada vez que cambies index.html
 const ASSETS = [
   './',
   './index.html',
@@ -24,11 +24,19 @@ self.addEventListener('activate', (e) => {
   self.clients.claim();
 });
 
-// Intercepta los pedidos: intenta red, si falla usa el caché (con fallback correcto)
+// CACHE-FIRST: responde al instante con lo ya guardado en el teléfono
+// (sin importar la conexión), y en segundo plano busca una versión nueva
+// ignorando el caché normal del navegador.
 self.addEventListener('fetch', (e) => {
   e.respondWith(
-    fetch(e.request).catch(() =>
-      caches.match(e.request).then((cached) => cached || caches.match('./index.html'))
-    )
+    caches.match(e.request).then((cached) => {
+      const networkFetch = fetch(e.request, { cache: 'no-cache' })
+        .then((response) => {
+          caches.open(CACHE_NAME).then((cache) => cache.put(e.request, response.clone()));
+          return response;
+        })
+        .catch(() => cached || caches.match('./index.html'));
+      return cached || networkFetch;
+    })
   );
 });
